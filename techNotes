@@ -1,0 +1,7 @@
+1.	bkqIFS="$IFS"
+		IFS=' ' read -r -a lengthMaxs << ${lengthMax[@]}
+	IFS="$bkqIFS"
+
+2.	awk -v lengthMax="${lengthMax[*]}" 'BEGIN{
+		split(lengthMax,lengthMaxs," ")
+	}{}{}'
