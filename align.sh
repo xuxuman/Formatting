@@ -2,24 +2,42 @@
 
 if [ $# == 2 ]
 then
-	lengthMax=0
+	lengthMax=()
 	space=""
-
-	lengthMax=`awk -v lengthMax="$lengthMax" 'BEGIN{}{
-	if(lengthMax<=length($1)){
-	lengthMax=length($1) 
-	printf "%d\n",lengthMax
+	num=0	
+	lengthMax=`awk -v lenthMax="$lengthMax[@]" 'BEGIN{
+	}{}{
+	for(i=1;i<NF;i++){
+		if(lengthMax[i]<length($i)){
+			lengthMax[i]=length($i) 
+		}
 	}
-	}{}' $1|tail -n 1`
-
-	lengthMax=`expr $lengthMax + 7`
-
-	awk -v lengthMax="$lengthMax"  'BEGIN{}{}{
-	space=""
-	for(i=0;i<(lengthMax-length($1));i++){
-	space=space " "}
-	printf "%s%s%s%s\n",$1,space,$2,$3
-	}' $1 >> $2
+	}{if(num<NF){
+		num=NF
+	}}END{
+		for(i=1;i<num;i++){
+		printf "%d",lengthMax[i]
+		if(i!=(num-1)){
+			printf " "
+		}
+	}
+	}' $1`
+	bkqIFS="$IFS"
+	IFS=' ' read -r -a lengthMax <<< ${lengthMax[@]}
+	IFS="$bkqIFS"
+	
+	awk -v lengthMax="${lengthMax[*]}" 'BEGIN{
+		split(lengthMax,lengthMaxs," ")
+	}{
+	record=""
+	for(j=1;j<NF+1;j++){
+		space=""
+		for(i=0;i<(lengthMaxs[j]-length($(j))+5);i++){
+			space=space " "
+		}
+		record=record $(j) space
+	} 
+	printf "%s\n",record }' $1 >> $2 
 else
 	echo "you need to specify the source file and the output file in order"
 fi
